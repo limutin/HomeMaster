@@ -1,0 +1,56 @@
+plugins {
+    id "com.android.application"
+    id 'com.google.gms.google-services' // Firebase services plugin
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin" // Flutter Gradle Plugin
+}
+
+android {
+    namespace = "com.homemaster.app" // Ensure this matches with the package name
+    compileSdk = 34
+    ndkVersion = "25.1.8937393"
+
+    compileOptions {
+        sourceCompatibility=1.8
+        targetCompatibility=1.8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    defaultConfig {
+        applicationId = "com.homemaster.app" // Ensure this matches with Firebase
+        minSdk = 28
+        targetSdk = 33
+        versionCode 1
+        versionName "1.0"
+        setProperty("archivesBaseName", "HomeMaster-v1.0")
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.debug 
+            minifyEnabled false // Set to true if you want to enable code shrinking
+            shrinkResources false // Set to true if you enable minification
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'// For now, use debug signing
+        }
+    }
+}
+
+dependencies {
+    // Firebase dependencies
+    implementation platform('com.google.firebase:firebase-bom:32.0.0') // Use the latest BOM version
+    implementation 'com.google.firebase:firebase-auth' // For Firebase Authentication
+    implementation 'com.google.android.gms:play-services-auth:20.4.0' // For Google Sign-In
+
+    // Other dependencies can be added here
+}
+
+flutter {
+    source = "../.."
+}
+
+

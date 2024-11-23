@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "98981312548",
+    "project_id": "homemaster-60771",
+    "storage_bucket": "homemaster-60771.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:98981312548:android:81c39d347b2eee5e1700b1",
+        "android_client_info": {
+          "package_name": "com.homemaster.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNs6UXYsTRGMKDChHKcTYbyeSWj2i7sOs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
