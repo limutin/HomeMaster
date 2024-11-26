@@ -77,8 +77,7 @@ class _HomeServiceProviderDashboardState
   Stream<QuerySnapshot> get _unreadMessagesStream => FirebaseFirestore.instance
       .collection('chat_rooms')
       .where('participants', arrayContains: user.uid)
-      .where('lastMessageReadBy', whereNotIn: [user.uid])
-      .snapshots();
+      .where('lastMessageReadBy', whereNotIn: [user.uid]).snapshots();
 
   void _navigateToAddJob() {
     Navigator.push(
@@ -255,43 +254,56 @@ class _HomeServiceProviderDashboardState
         appBar: AppBar(
           backgroundColor: theme.appBarTheme.backgroundColor,
           elevation: 0,
-          title: StreamBuilder<DocumentSnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('service_providers')
-                .where('userId', isEqualTo: user.uid)
-                .snapshots()
-                .map((query) => query.docs.first),
-            builder: (context, snapshot) {
-              String providerName = 'Service Provider'; // Default name
+          automaticallyImplyLeading: false,
+          title: Row(
+            children: [
+              Image.asset(
+                'assets/icon/icon.png',
+                width: 40,
+                height: 40,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: StreamBuilder<DocumentSnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('service_providers')
+                      .where('userId', isEqualTo: user.uid)
+                      .snapshots()
+                      .map((query) => query.docs.first),
+                  builder: (context, snapshot) {
+                    String providerName = 'Service Provider'; // Default name
 
-              if (snapshot.hasData && snapshot.data != null) {
-                final data = snapshot.data!.data() as Map<String, dynamic>?;
-                if (data != null && data['fullName'] != null) {
-                  providerName = data['fullName'];
-                }
-              }
+                    if (snapshot.hasData && snapshot.data != null) {
+                      final data = snapshot.data!.data() as Map<String, dynamic>?;
+                      if (data != null && data['fullName'] != null) {
+                        providerName = data['fullName'];
+                      }
+                    }
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Welcome back!',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
-                    ),
-                  ),
-                  Text(
-                    providerName,
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ],
-              );
-            },
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Welcome back!',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: isDark ? Colors.grey[400] : Colors.grey[600],
+                          ),
+                        ),
+                        Text(
+                          providerName,
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
           actions: [
             IconButton(
@@ -308,17 +320,15 @@ class _HomeServiceProviderDashboardState
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-                    final profileImageBase64 = snapshot.data!.docs.first.data()
-                        as Map<String, dynamic>;
+                    final profileImageBase64 =
+                        snapshot.data!.docs.first.data() as Map<String, dynamic>;
                     return CircleAvatar(
                       radius: 16,
-                      backgroundColor:
-                          theme.colorScheme.primary.withOpacity(0.1),
-                      backgroundImage:
-                          profileImageBase64['profileImageBase64'] != null
-                              ? MemoryImage(base64Decode(
-                                  profileImageBase64['profileImageBase64']))
-                              : null,
+                      backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                      backgroundImage: profileImageBase64['profileImageBase64'] != null
+                          ? MemoryImage(
+                              base64Decode(profileImageBase64['profileImageBase64']))
+                          : null,
                       child: profileImageBase64['profileImageBase64'] == null
                           ? Icon(
                               Icons.person,
@@ -1502,7 +1512,8 @@ class _HomeServiceProviderDashboardState
     );
   }
 
-  Future<void> _handleBookingResponse(DocumentSnapshot booking, bool accept) async {
+  Future<void> _handleBookingResponse(
+      DocumentSnapshot booking, bool accept) async {
     try {
       final bookingData = booking.data() as Map<String, dynamic>;
       final homeownerDoc = await FirebaseFirestore.instance
@@ -1526,8 +1537,9 @@ class _HomeServiceProviderDashboardState
 
         // Create or update chat room with participants array and initial message
         final chatRoomId = '${user.uid}_${bookingData['homeownerId']}';
-        final chatRoomRef = FirebaseFirestore.instance.collection('chat_rooms').doc(chatRoomId);
-        
+        final chatRoomRef =
+            FirebaseFirestore.instance.collection('chat_rooms').doc(chatRoomId);
+
         // Check if chat room exists
         final chatRoomDoc = await chatRoomRef.get();
         if (!chatRoomDoc.exists) {
@@ -1616,7 +1628,8 @@ class _HomeServiceProviderDashboardState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Booking ${accept ? 'accepted' : 'declined'} successfully'),
+            content: Text(
+                'Booking ${accept ? 'accepted' : 'declined'} successfully'),
             backgroundColor: accept ? Colors.green : Colors.red,
           ),
         );

@@ -18,6 +18,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
   // Navigate to OTP verification page
   void navigateToOtpVerification(BuildContext context) {
@@ -102,6 +103,22 @@ class _SignUpPageState extends State<SignUpPage> {
                           validator: (value) {
                             if (value == null || value.length < 8) {
                               return 'Password must be at least 8 characters long';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                        MyTextField(
+                          controller: confirmPasswordController,
+                          hintText: 'Confirm Password',
+                          obscureText: true,
+                          borderRadius: BorderRadius.circular(18),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please confirm your password';
+                            }
+                            if (value != passwordController.text) {
+                              return 'Passwords do not match';
                             }
                             return null;
                           },

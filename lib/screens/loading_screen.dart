@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:lottie/lottie.dart';
 import 'package:homemaster/screens/terms_and_conditions.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 
@@ -59,18 +58,14 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Lottie.asset(
-          'assets/loading.json',
+        Image.asset(
+          'assets/icon/icon.png',
           width: 200,
           height: 200,
         ),
-        const SizedBox(height: 20),
-        Text(
-          'Checking connection...',
-          style: GoogleFonts.roboto(
-            color: Colors.white,
-            fontSize: 16,
-          ),
+        const SizedBox(height: 30),
+        const CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1C59D2)),
         ),
       ],
     );
@@ -80,8 +75,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Lottie.asset(
-          'assets/no_internet.json',
+        Image.asset(
+          'assets/icon/icon.png',
           width: 200,
           height: 200,
         ),
@@ -133,28 +128,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
     );
   }
 
-  Widget _buildConnectedState() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Lottie.asset(
-          'assets/check_animation.json',
-          width: 100,
-          height: 100,
-        ),
-        const SizedBox(height: 20),
-        Text(
-          'Connected!',
-          style: GoogleFonts.roboto(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -174,7 +147,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   return _buildNoInternetState();
                 }
 
-                return _buildConnectedState();
+                return _buildLoadingState();
               },
             ),
           ),

@@ -118,6 +118,136 @@ class _HomeOwnerDashboardState extends State<HomeOwnerDashboard> {
     return null;
   }
 
+  void _showProviderRatings(String providerId, String providerName, String? providerImage) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                    backgroundImage: providerImage != null
+                        ? MemoryImage(base64Decode(providerImage))
+                        : null,
+                    child: providerImage == null
+                        ? Icon(Icons.person, color: Theme.of(context).primaryColor)
+                        : null,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          providerName,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('ratings')
+                              .where('serviceProviderId', isEqualTo: providerId)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const Text('Loading ratings...');
+                            }
+
+                            final ratings = snapshot.data!.docs;
+                            if (ratings.isEmpty) {
+                              return const Text('No ratings yet');
+                            }
+
+                            double averageRating = ratings.fold(0.0, (sum, doc) {
+                              return sum + (doc.data() as Map<String, dynamic>)['rating'];
+                            }) / ratings.length;
+
+                            return Row(
+                              children: [
+                                Icon(Icons.star, color: Colors.amber, size: 20),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${averageRating.toStringAsFixed(1)} (${ratings.length} reviews)',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Recent Reviews',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('ratings')
+                      .where('serviceProviderId', isEqualTo: providerId)
+                      .orderBy('timestamp', descending: true)
+                      .limit(5)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final reviews = snapshot.data!.docs;
+                    if (reviews.isEmpty) {
+                      return const Center(child: Text('No reviews yet'));
+                    }
+
+                    return ListView.builder(
+                      itemCount: reviews.length,
+                      itemBuilder: (context, index) {
+                        final review = reviews[index].data() as Map<String, dynamic>;
+                        return ListTile(
+                          title: Row(
+                            children: [
+                              ...List.generate(
+                                review['rating'].toInt(),
+                                (index) => const Icon(Icons.star, color: Colors.amber, size: 16),
+                              ),
+                            ],
+                          ),
+                          subtitle: Text(review['comment'] ?? 'No comment'),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -166,62 +296,54 @@ class _HomeOwnerDashboardState extends State<HomeOwnerDashboard> {
         },
         child: Scaffold(
           appBar: AppBar(
-            title: StreamBuilder<DocumentSnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('homeowners')
-                  .doc(FirebaseAuth.instance.currentUser?.uid)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data!.exists) {
-                  final homeownerData =
-                      snapshot.data!.data() as Map<String, dynamic>;
-                  return Row(
-                    children: [
-                      StreamBuilder<DocumentSnapshot>(
-                        stream: FirebaseFirestore.instance
-                            .collection('homeowners')
-                            .doc(user?.uid)
-                            .snapshots(),
-                        builder: (context, profileSnapshot) {
-                          final profileData = profileSnapshot.data?.data()
-                              as Map<String, dynamic>?;
-                          return CircleAvatar(
-                            backgroundImage:
-                                profileData?['profileImageBase64'] != null
-                                    ? MemoryImage(base64Decode(
-                                        profileData!['profileImageBase64']))
-                                    : null,
-                            child: profileData?['profileImageBase64'] == null
-                                ? const Icon(Icons.person)
-                                : null,
-                          );
-                        },
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Welcome!',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
+            automaticallyImplyLeading: false,
+            title: Row(
+              children: [
+                Image.asset(
+                  'assets/icon/icon.png',
+                  width: 40,
+                  height: 40,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: StreamBuilder<DocumentSnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('homeowners')
+                        .doc(user?.uid)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData && snapshot.data!.exists) {
+                        final homeownerData = snapshot.data!.data() as Map<String, dynamic>;
+                        return Row(
+                          children: [
+                            const SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Welcome!',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                Text(
+                                  homeownerData['fullName'] ?? 'User',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          Text(
-                            homeownerData['fullName'] ?? 'User',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                }
-                return const Text('Loading...');
-              },
+                          ],
+                        );
+                      }
+                      return const Text('Loading...');
+                    },
+                  ),
+                ),
+              ],
             ),
             actions: [
               IconButton(
@@ -230,19 +352,32 @@ class _HomeOwnerDashboardState extends State<HomeOwnerDashboard> {
                   Navigator.pushNamed(context, '/notifications');
                 },
               ),
-              IconButton(
-                icon: Icon(
-                  Icons.person,
-                  color: isDark ? Colors.white : const Color(0xFF1C59D2),
-                  size: 28,
-                ),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const HomeownerProfile(),
-                  ),
-                ),
-              )
+              StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('homeowners')
+                    .doc(user?.uid)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  return IconButton(
+                    icon: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                      backgroundImage: snapshot.hasData && 
+                          snapshot.data!.exists && 
+                          (snapshot.data!.data() as Map<String, dynamic>)['profileImageBase64'] != null
+                          ? MemoryImage(base64Decode(
+                              (snapshot.data!.data() as Map<String, dynamic>)['profileImageBase64']))
+                          : null,
+                    ),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HomeownerProfile(),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
           body: SmartRefresher(

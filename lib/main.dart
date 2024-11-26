@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:homemaster/homeowner%20screens/owner_settings_page.dart';
-import 'package:homemaster/screens/terms_and_conditions.dart';
-//import 'package:homemaster/screens/loading_screen.dart';
+//import 'package:homemaster/screens/terms_and_conditions.dart';
+import 'package:homemaster/screens/loading_screen.dart';
 import 'homeowner screens/home_owner_dashboard.dart';
 import 'homeservice provider screens/profile_page.dart';
 import 'package:provider/provider.dart';
@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           initialRoute: '/',
           routes: {
-            '/': (context) => const TermsAndConditionsScreen(),
+            '/': (context) => const LoadingScreen(),
             '/dashboard': (context) => const HomeOwnerDashboard(),
             '/settings': (context) => const SettingsPage(),
             '/login': (context) => const LoginPage(),
